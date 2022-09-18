@@ -8,6 +8,8 @@ import (
 	"github.com/line/line-bot-sdk-go/linebot"
 )
 
+//aaaaaaa
+
 func main() {
 	http.HandleFunc("/calback", lineHandler)
 	fmt.Println("http://localhost:8080 で起動中...")
