@@ -1,13 +1,32 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
+	_ "github.com/lib/pq"
+
 	"github.com/line/line-bot-sdk-go/linebot"
 )
+
+type Schedule struct {
+	Id       int
+	Day      int
+	Contents string
+}
+
+var Db *sql.DB
+
+func init() {
+	var err error
+	Db, err = sql.Open("postgres", "usr= dbname= password=")
+	if err != nil {
+		panic(err)
+	}
+}
 
 func main() {
 	http.HandleFunc("/calback", lineHandler)
@@ -43,12 +62,18 @@ func lineHandler(w http.ResponseWriter, r *http.Request) {
 				if strings.Contains(replyMessage, "作成") {
 					replyMessage := "作成します"
 					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+					schedule := Schedule{Day: 20220101, Contents: "テスト"}
+					schedule.Create()
+					replyMessage = "作成しました"
+					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				} else if strings.Contains(replyMessage, "更新") {
 					replyMessage := "更新します"
 					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 				} else if strings.Contains(replyMessage, "削除") {
 					replyMessage := "削除します"
 					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+					schedule := Schedule{Id: 1}
+					schedule.Delete()
 				} else if strings.Contains(replyMessage, "取得") {
 					replyMessage := "取得します"
 					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
@@ -77,4 +102,14 @@ func lineHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+func (schedule *Schedule) Create() (err error) {
+	err = Db.QueryRow("insert into schedule (day, contents) values ($1, $2) returning id", schedule.Day, schedule.Contents).Scan(&schedule.Id)
+	return
+}
+
+func (schedule *Schedule) Delete() (err error) {
+	_, err = Db.Exec("delete from schedule where id = $1", schedule.Id)
+	return
 }
