@@ -66,17 +66,25 @@ func lineHandler(w http.ResponseWriter, r *http.Request) {
 					schedule.Create()
 					replyMessage = "作成しました"
 					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+
 				} else if strings.Contains(replyMessage, "更新") {
 					replyMessage := "更新します"
 					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+					schedule := Schedule{Day: 20220101, Contents: "アップデートしました"}
+					schedule.Update()
+					replyMessage = "更新しました"
+					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+
 				} else if strings.Contains(replyMessage, "削除") {
 					replyMessage := "削除します"
 					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 					schedule := Schedule{Id: 1}
 					schedule.Delete()
+
 				} else if strings.Contains(replyMessage, "取得") {
 					replyMessage := "取得します"
 					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+
 				} else {
 					_, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 					if err != nil {
@@ -106,6 +114,11 @@ func lineHandler(w http.ResponseWriter, r *http.Request) {
 
 func (schedule *Schedule) Create() (err error) {
 	err = Db.QueryRow("insert into schedule (day, contents) values ($1, $2) returning id", schedule.Day, schedule.Contents).Scan(&schedule.Id)
+	return
+}
+
+func (schedule *Schedule) Update() (err error) {
+	_, err = Db.Exec("update schedule set day = $2, contents = $3 where id = $1", schedule.Id, schedule.Day, schedule.Contents)
 	return
 }
 
