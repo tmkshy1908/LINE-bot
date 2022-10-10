@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	_ "github.com/lib/pq"
@@ -82,7 +83,9 @@ func lineHandler(w http.ResponseWriter, r *http.Request) {
 					schedule.Delete()
 
 				} else if strings.Contains(replyMessage, "取得") {
-					replyMessage := "取得します"
+					// replyMessage := "取得します"
+					rm, _ := GetSchedule(1)
+					replyMessage := strconv.Itoa(rm.Id)
 					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
 
 				} else {
@@ -124,5 +127,11 @@ func (schedule *Schedule) Update() (err error) {
 
 func (schedule *Schedule) Delete() (err error) {
 	_, err = Db.Exec("delete from schedule where id = $1", schedule.Id)
+	return
+}
+
+func GetSchedule(id int) (schedule Schedule, err error) {
+	schedule = Schedule{}
+	err = Db.QueryRow("select id, day, contents from schedule where id = &1", id).Scan(&schedule.Id, &schedule.Day, &schedule.Contents)
 	return
 }
