@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	_ "github.com/lib/pq"
@@ -23,7 +22,7 @@ var Db *sql.DB
 
 func init() {
 	var err error
-	Db, err = sql.Open("postgres", "user= dbname= password= sslmode=disable")
+	Db, err = sql.Open("postgres", "user=yamadatarou dbname=bot_schedule password=1234 sslmode=disable")
 	if err != nil {
 		fmt.Println("Db.Openエラー:", err)
 	}
@@ -37,8 +36,8 @@ func main() {
 
 func lineHandler(w http.ResponseWriter, r *http.Request) {
 	bot, err := linebot.New(
-		"チャンネルシークレット",
-		"アクセストークン",
+		"4a7eaa800c243575a028db8438842246",
+		"P5L9UuMlMuG6sRbGgC0N/rGfICCAZ4P0ixLf7hgomVVyqxHvD5G4ZHNqu7IxpkpYut2LJ5NJ1qgKtCBveIIx4MZGOzuR6ldFGC33TBOXktYbHGhHY7bwQuolurMpN5YW/enP8ZNWUdBjE7PeqGEOswdB04t89/1O/w1cDnyilFU=",
 	)
 	if err != nil {
 		fmt.Println("linebot.Newエラー:", err)
@@ -84,9 +83,10 @@ func lineHandler(w http.ResponseWriter, r *http.Request) {
 
 				} else if strings.Contains(replyMessage, "取得") {
 					// replyMessage := "取得します"
-					rm, _ := GetSchedule(1)
-					replyMessage := strconv.Itoa(rm.Id)
-					bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+					// rm, _ := GetSchedule(1)
+					// replyMessage := strconv.Itoa(rm.Id)
+					// bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
+					fmt.Println(GetSchedule(1))
 
 				} else {
 					_, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do()
